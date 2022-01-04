@@ -1,0 +1,27 @@
+{
+  "components": {
+    "plugins": {
+      "ExportJSON": {
+        "src": "src/plugins/ExportJSON",
+        "test": "test/plugins/ExportJSON"
+      },
+      "ImportJSON": {
+        "src": "src/plugins/ImportJSON",
+        "test": "test/plugins/ImportJSON"
+      },
+      "CreateConfig": {
+        "src": "src/plugins/CreateConfig",
+        "test": "test/plugins/CreateConfig"
+      }
+    },
+    "seeds": {
+      "JSON": {
+        "src": "src/seeds/JSON"
+      }
+    }
+  },
+  "dependencies": {
+    "plugins": {},
+    "seeds": {}
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "id": "ImportJSON",
+  "name": "ImportJSON",
+  "version": "0.1.0",
+  "description": "",
+  "icon": {
+    "class": "glyphicon glyphicon-import",
+    "src": ""
+  },
+  "disableServerSideExecution": false,
+  "disableBrowserSideExecution": false,
+  "dependencies": [],
+  "writeAccessRequired": false,
+  "configStructure": [{
+    "name": "json",
+    "displayName": "JSON content to import",
+    "description": "A textual file containing a JSON object/array",
+    "value": "",
+    "valueType": "asset",
+    "readOnly": false
+  },
+  {
+    "name": "isType",
+    "displayName": "Should the content be used as a type or as an instance?",
+    "description": "If true the object will be stored among types.",
+    "value": false,
+    "valueType": "boolean",
+    "readOnly": false
+  },
+  {
+    "name": "name",
+    "displayName": "The name of the created object/array",
+    "description": "the unique name that should identify the input",
+    "value": "",
+    "valueType": "string",
+    "readOnly": false
+  }]
+}

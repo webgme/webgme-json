@@ -1,0 +1,22 @@
+{
+  "id": "ExportJSON",
+  "name": "ExportJSON",
+  "version": "0.1.0",
+  "description": "",
+  "icon": {
+    "class": "glyphicon glyphicon-export",
+    "src": ""
+  },
+  "disableServerSideExecution": false,
+  "disableBrowserSideExecution": false,
+  "dependencies": [],
+  "writeAccessRequired": false,
+  "configStructure": [{
+    "name": "name",
+    "displayName": "The name of the output file",
+    "description": "The name of the output file that will be created from the object (without extension)",
+    "value": "",
+    "valueType": "string",
+    "readOnly": false
+  }]
+}
