@@ -1,0 +1,144 @@
+{
+    "id": "2489658579",
+    "type": "IssueCommentEvent",
+    "actor": {
+        "id": 161552,
+        "login": "pbnjay",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/pbnjay",
+        "avatar_url": "https://avatars.githubusercontent.com/u/161552?"
+    },
+    "repo": {
+        "id": 2945088,
+        "name": "revel/revel",
+        "url": "https://api.github.com/repos/revel/revel"
+    },
+    "payload": {
+        "action": "created",
+        "issue": {
+            "url": "https://api.github.com/repos/revel/revel/issues/811",
+            "labels_url": "https://api.github.com/repos/revel/revel/issues/811/labels{/name}",
+            "comments_url": "https://api.github.com/repos/revel/revel/issues/811/comments",
+            "events_url": "https://api.github.com/repos/revel/revel/issues/811/events",
+            "html_url": "https://github.com/revel/revel/issues/811",
+            "id": 50049098,
+            "number": 811,
+            "title": "template url func gives \"index out of range\" when param is undefined",
+            "user": {
+                "login": "pbnjay",
+                "id": 161552,
+                "avatar_url": "https://avatars.githubusercontent.com/u/161552?v=3",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/pbnjay",
+                "html_url": "https://github.com/pbnjay",
+                "followers_url": "https://api.github.com/users/pbnjay/followers",
+                "following_url": "https://api.github.com/users/pbnjay/following{/other_user}",
+                "gists_url": "https://api.github.com/users/pbnjay/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/pbnjay/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/pbnjay/subscriptions",
+                "organizations_url": "https://api.github.com/users/pbnjay/orgs",
+                "repos_url": "https://api.github.com/users/pbnjay/repos",
+                "events_url": "https://api.github.com/users/pbnjay/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/pbnjay/received_events",
+                "type": "User",
+                "site_admin": false
+            },
+            "labels": [
+                {
+                    "url": "https://api.github.com/repos/revel/revel/labels/controller",
+                    "name": "controller",
+                    "color": "eb6420"
+                },
+                {
+                    "url": "https://api.github.com/repos/revel/revel/labels/enhancement",
+                    "name": "enhancement",
+                    "color": "207de5"
+                },
+                {
+                    "url": "https://api.github.com/repos/revel/revel/labels/template",
+                    "name": "template",
+                    "color": "fbca04"
+                }
+            ],
+            "state": "open",
+            "locked": false,
+            "assignee": null,
+            "milestone": {
+                "url": "https://api.github.com/repos/revel/revel/milestones/6",
+                "labels_url": "https://api.github.com/repos/revel/revel/milestones/6/labels",
+                "id": 766323,
+                "number": 6,
+                "title": "v0.12",
+                "description": null,
+                "creator": {
+                    "login": "brendensoares",
+                    "id": 905501,
+                    "avatar_url": "https://avatars.githubusercontent.com/u/905501?v=3",
+                    "gravatar_id": "",
+                    "url": "https://api.github.com/users/brendensoares",
+                    "html_url": "https://github.com/brendensoares",
+                    "followers_url": "https://api.github.com/users/brendensoares/followers",
+                    "following_url": "https://api.github.com/users/brendensoares/following{/other_user}",
+                    "gists_url": "https://api.github.com/users/brendensoares/gists{/gist_id}",
+                    "starred_url": "https://api.github.com/users/brendensoares/starred{/owner}{/repo}",
+                    "subscriptions_url": "https://api.github.com/users/brendensoares/subscriptions",
+                    "organizations_url": "https://api.github.com/users/brendensoares/orgs",
+                    "repos_url": "https://api.github.com/users/brendensoares/repos",
+                    "events_url": "https://api.github.com/users/brendensoares/events{/privacy}",
+                    "received_events_url": "https://api.github.com/users/brendensoares/received_events",
+                    "type": "User",
+                    "site_admin": false
+                },
+                "open_issues": 48,
+                "closed_issues": 49,
+                "state": "open",
+                "created_at": "2014-08-26T16:54:06Z",
+                "updated_at": "2015-01-01T09:06:26Z",
+                "due_on": null,
+                "closed_at": null
+            },
+            "comments": 5,
+            "created_at": "2014-11-25T16:21:11Z",
+            "updated_at": "2015-01-01T15:16:13Z",
+            "closed_at": null,
+            "body": "Just spent over 30 mins debugging a simple omission cause the error message sent me down the wrong path. But I think it should be pretty easy to fix.\r\n\r\nIn short: in the template I have `{{url \"MC.Thing\" $id}}` but my func was: `func (c MC) Thing() revel.Result`\r\n\r\nBut the template panicked with: `results.go:128: runtime error: index out of range`\r\n\r\nI'd expect an error more like \"invalid arguments for url MC.Thing\""
+        },
+        "comment": {
+            "url": "https://api.github.com/repos/revel/revel/issues/comments/68488830",
+            "html_url": "https://github.com/revel/revel/issues/811#issuecomment-68488830",
+            "issue_url": "https://api.github.com/repos/revel/revel/issues/811",
+            "id": 68488830,
+            "user": {
+                "login": "pbnjay",
+                "id": 161552,
+                "avatar_url": "https://avatars.githubusercontent.com/u/161552?v=3",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/pbnjay",
+                "html_url": "https://github.com/pbnjay",
+                "followers_url": "https://api.github.com/users/pbnjay/followers",
+                "following_url": "https://api.github.com/users/pbnjay/following{/other_user}",
+                "gists_url": "https://api.github.com/users/pbnjay/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/pbnjay/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/pbnjay/subscriptions",
+                "organizations_url": "https://api.github.com/users/pbnjay/orgs",
+                "repos_url": "https://api.github.com/users/pbnjay/repos",
+                "events_url": "https://api.github.com/users/pbnjay/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/pbnjay/received_events",
+                "type": "User",
+                "site_admin": false
+            },
+            "created_at": "2015-01-01T15:16:13Z",
+            "updated_at": "2015-01-01T15:16:13Z",
+            "body": "Yeah, sorry on my phone right now but I believe it was my view func didn't\r\nhave a named parameter but I thought it did. The \"url\" helper didn't do a\r\nbounds check.\r\n\r\nSomething like:\r\nfunc (a *App) Thing() revel.Result {\r\n...\r\n}\r\n\r\nThen:\r\n{{url \"App.Thing\" 1234}}\r\nOn Jan 1, 2015 3:43 AM, \"anonx\" <notifications@github.com> wrote:\r\n\r\n> @brendensoares <https://github.com/brendensoares>, the issue is {{url\r\n> \"Controller.Action\" .arg1 .arg2 ...}} helper panics in case of incorrect\r\n> input rather than showing a user friendly error message.\r\n>\r\n> —\r\n> Reply to this email directly or view it on GitHub\r\n> <https://github.com/revel/revel/issues/811#issuecomment-68482604>.\r\n>"
+        }
+    },
+    "public": true,
+    "created_at": "2015-01-01T15:16:13Z",
+    "org": {
+        "id": 6631594,
+        "login": "revel",
+        "gravatar_id": "",
+        "url": "https://api.github.com/orgs/revel",
+        "avatar_url": "https://avatars.githubusercontent.com/u/6631594?"
+    }
+}

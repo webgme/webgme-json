@@ -117,6 +117,9 @@ define([
                     newNode = core.createChild(node, META['ArrayElement']);
                     core.setAttribute(newNode, 'name', key);
                     buildArray(jsonSegment[key], newNode);
+                } else if(jsonSegment[key] === null) {
+                    newNode = core.createChild(node, META['NullElement']);
+                    core.setAttribute(newNode, 'name', key);
                 } else if (typeof jsonSegment[key] === 'object') {
                     newNode = core.createChild(node, META['ObjectElement']);
                     core.setAttribute(newNode, 'name', key);
@@ -128,7 +131,7 @@ define([
         };
 
         const buildArray = function (jsonSegment, node) {
-            jsonSegment.forEach(element, index => {
+            jsonSegment.forEach((element, index) => {
                 let newNode = null;
                 if(typeof element === 'string') {
                     newNode = core.createChild(node, META['StringElement']);
@@ -146,6 +149,9 @@ define([
                     newNode = core.createChild(node, META['ArrayElement']);
                     core.setAttribute(newNode, 'name', index);
                     buildArray(element, newNode);
+                } else if(element === null) {
+                    newNode = core.createChild(node, META['NullElement']);
+                    core.setAttribute(newNode, 'name', index);
                 } else if (typeof element === 'object') {
                     newNode = core.createChild(node, META['ObjectElement']);
                     core.setAttribute(newNode, 'name', index);

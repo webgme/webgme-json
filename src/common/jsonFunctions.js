@@ -53,6 +53,8 @@ define([], function () {
                     core.isInstanceOf(node, META.NumberElement) ||
                     core.isInstanceOf(node, META.StringElement)) {
                     result[key] = core.getAttribute(node, 'value');
+                } else if (core.isInstanceOf(node, META.NullElement)) {
+                    result[key] = null;
                 } else if (core.isInstanceOf(node, META.ArrayElement)) {
                     result[key] = exportArray(node);
                 } else if(core.isInstanceOf(node, META.ObjectElement)) {
@@ -82,6 +84,8 @@ define([], function () {
                     core.isInstanceOf(node, META.NumberElement) ||
                     core.isInstanceOf(node, META.StringElement)) {
                     result.push(core.getAttribute(node, 'value'));
+                } else if (core.isInstanceOf(node, META.NullElement)) {
+                    result.push(null);
                 } else if (core.isInstanceOf(node, META.ArrayElement)) {
                     result.push(exportArray(node));
                 } else if(core.isInstanceOf(node, META.ObjectElement)) {
