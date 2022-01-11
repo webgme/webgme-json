@@ -19,6 +19,7 @@
     "webgme": "^2.23.0"
   },
   "dependencies": {
+    "monaco-editor": "^0.31.1",
     "webgme": "^2.23.0"
   }
 }

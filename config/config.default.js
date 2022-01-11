@@ -9,5 +9,7 @@ var config = require('./config.webgme'),
 
 config.seedProjects.defaultProject = 'JSON';
 
+config.requirejsPaths['vs'] = './node-modules/monaco-editor/min/vs';
+
 validateConfig(config);
 module.exports = config;
