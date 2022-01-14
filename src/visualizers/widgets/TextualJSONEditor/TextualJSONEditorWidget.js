@@ -13,91 +13,90 @@ define(['css!./styles/TextualJSONEditorWidget.css', 'vs/loader','vs/editor/edito
         this._logger = logger.fork('Widget');
 
         this._el = container;
+        this._control = null;
+        this._editor = null;
 
         this.nodes = {};
         this._initialize();
+        
 
         this._logger.debug('ctor finished');
     }
 
     TextualJSONEditorWidget.prototype._initialize = function () {
-        console.log(monaco);
+        // console.log(monaco);
         var width = this._el.width(),
             height = this._el.height(),
             self = this;
 
         // set widget class
         this._el.addClass(WIDGET_CLASS);
-
-        // Create a dummy header
-        this._el.append('<h3>TextualJSONEditor Events:</h3>');
-
-        // Registering to events can be done with jQuery (as normal)
-        this._el.on('dblclick', function (event) {
-            event.stopPropagation();
-            event.preventDefault();
-            self.onBackgroundDblClick();
-        });
+        this._el.append('<div id="monaco_container" style=“width:100%;height:100%;”></div>');
     };
 
     TextualJSONEditorWidget.prototype.onWidgetContainerResize = function (width, height) {
         this._logger.debug('Widget is resizing...');
     };
 
-    // Adding/Removing/Updating items
-    TextualJSONEditorWidget.prototype.addNode = function (desc) {
-        if (desc) {
-            // Add node to a table of nodes
-            var node = document.createElement('div'),
-                label = 'children';
+    TextualJSONEditorWidget.prototype.setJSON = function (JSONvalue) {
 
-            if (desc.childrenIds.length === 1) {
-                label = 'child';
+        if (this._editor === null) {
+            this._editor = monaco.editor.create(document.getElementById('monaco_container'), {
+                language: 'json',
+                contextmenu: false,
+                minimap: { enabled: false },
+                fixedOverflowWidgets: false,
+                /*overflowWidgetsDomNode: document.getElementsByClassName('textual-j-s-o-n-editor')[0]*/
+            });
+            monaco.languages.json.jsonDefaults.setDiagnosticsOptions({validate: true});
+            this._editor.getModel().onDidChangeContent((event) => {
+                if(this._editor.getModel().getValue() !== JSONvalue) {
+                    this._control.onJsonValidityChanged(this.isJSONValid());
+                } else {
+                    this._control.onJsonValidityChanged(false);
+                }
+            });
+        }
+
+        monaco.editor.onDidChangeMarkers((event) => {
+            console.log(event);
+            if (this._control) {
+                this._control.onJsonValidityChanged(this.isJSONValid());
             }
+        });
+        this._editor.getModel().setValue(JSONvalue);
+    };
 
-            this.nodes[desc.id] = desc;
-            node.innerHTML = 'Adding node "' + desc.name + '" (click to view). It has ' +
-                desc.childrenIds.length + ' ' + label + '.';
-
-            this._el.append(node);
-            node.onclick = this.onNodeClick.bind(this, desc.id);
+    TextualJSONEditorWidget.prototype.getJSON = function () {
+        if (this._editor === null) {
+            return null;
+        } else if (this.isJSONValid()) {
+            return this._editor.getModel().getValue();
+        } else {
+            return null;
         }
     };
 
-    TextualJSONEditorWidget.prototype.removeNode = function (gmeId) {
-        var desc = this.nodes[gmeId];
-        this._el.append('<div>Removing node "' + desc.name + '"</div>');
-        delete this.nodes[gmeId];
-    };
-
-    TextualJSONEditorWidget.prototype.updateNode = function (desc) {
-        if (desc) {
-            this._logger.debug('Updating node:', desc);
-            this._el.append('<div>Updating node "' + desc.name + '"</div>');
+    TextualJSONEditorWidget.prototype.isJSONValid = function () {
+        if (this._editor === null) {
+            return false;
+        } else {
+            return monaco.editor.getModelMarkers().length === 0;
         }
-    };
-
-    /* * * * * * * * Visualizer event handlers * * * * * * * */
-
-    TextualJSONEditorWidget.prototype.onNodeClick = function (/*id*/) {
-        // This currently changes the active node to the given id and
-        // this is overridden in the controller.
-    };
-
-    TextualJSONEditorWidget.prototype.onBackgroundDblClick = function () {
-        this._el.append('<div>Background was double-clicked!!</div>');
     };
 
     /* * * * * * * * Visualizer life cycle callbacks * * * * * * * */
     TextualJSONEditorWidget.prototype.destroy = function () {
     };
 
-    TextualJSONEditorWidget.prototype.onActivate = function () {
+    TextualJSONEditorWidget.prototype.onActivate = function (control) {
         this._logger.debug('TextualJSONEditorWidget has been activated');
+        this._control = control
     };
 
     TextualJSONEditorWidget.prototype.onDeactivate = function () {
         this._logger.debug('TextualJSONEditorWidget has been deactivated');
+        this._control = null;
     };
 
     return TextualJSONEditorWidget;

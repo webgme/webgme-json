@@ -9,7 +9,8 @@ var config = require('./config.webgme'),
 
 config.seedProjects.defaultProject = 'JSON';
 
-config.requirejsPaths['vs'] = './node-modules/monaco-editor/min/vs';
+config.requirejsPaths['vs'] = './node_modules/monaco-editor/min/vs';
+config.core.overlayShardSize = 100000;
 
 validateConfig(config);
 module.exports = config;

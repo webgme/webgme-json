@@ -1,0 +1,22 @@
+{
+  "id": "JSONToModel",
+  "name": "JSONToModel",
+  "version": "0.1.0",
+  "description": "",
+  "icon": {
+    "class": "glyphicon glyphicon-cog",
+    "src": ""
+  },
+  "disableServerSideExecution": false,
+  "disableBrowserSideExecution": false,
+  "dependencies": [],
+  "writeAccessRequired": false,
+  "configStructure": [{
+    "name": "jsonText",
+    "displayName": "stringified JSON model",
+    "description": "string representing the JSON model",
+    "value": "",
+    "valueType": "string",
+    "readOnly": false
+  }]
+}

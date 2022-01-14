@@ -11,11 +11,13 @@ define([
     'plugin/PluginConfig',
     'text!./metadata.json',
     'plugin/PluginBase',
+    'webgme-json/jsonFunctions',
     'q'
 ], function (
     PluginConfig,
     pluginMetadata,
     PluginBase,
+    JsonFunctions,
     Q) {
     'use strict';
 
@@ -178,9 +180,24 @@ define([
 
     ImportJSON.prototype.import = function(name, jsonObject, isType) {
         const self = this;
+        const core = self.core;
+        const META = self.META;
+        const nodeDict = {};
+        let fullNode = null;
 
-        const parent = self.getParentFolder(isType)
-        self.buildFromInput(name, jsonObject, parent);
+        const parent = self.getParentFolder(isType);
+        // self.buildFromInput(name, jsonObject, parent);
+        if (Array.isArray(jsonObject)) {
+            fullNode = core.createChild(parent, META['ArrayElement']);
+            core.setAttribute(fullNode, 'name', name);
+        } else if (typeof jsonObject === 'object') {
+            fullNode = core.createChild(parent, META['ObjectElement']);
+            core.setAttribute(fullNode, 'name', name);
+        } else {
+            throw new Error('Invalid input');
+        }
+        nodeDict[''] = fullNode;
+        JsonFunctions.JSONToModel(nodeDict, jsonObject, '', name, parent, core, META, self.logger);
     };
 
     return ImportJSON;

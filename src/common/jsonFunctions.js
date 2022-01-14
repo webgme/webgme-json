@@ -112,8 +112,148 @@ define([], function () {
         return result;
     }
 
+    const _clearSubElementsFromDictionary = function(dictionary, jsonPath) {
+        const elementsToRemove = [];
+        Object.keys(dictionary).forEach(path => {
+            if(path.indexOf(jsonPath + '/') === 0) {
+                elementsToRemove.push(path);
+            }
+        });
+
+        elementsToRemove.forEach(path => {
+            delete dictionary[path];
+        });
+    }
+
+    const JSONToModel = function(jsonPathToNodeDictionary, jsonValue, jsonPath, name, parent, core, META, logger) {
+        let node = jsonPathToNodeDictionary[jsonPath] || null;
+        if (typeof jsonValue === 'string') {
+            if (node) {
+                if (!core.isInstanceOf(node, META['StringElement'])) {
+                    core.setBase(node, META['StringElement']);
+                }
+                core.setAttribute(node, 'value', jsonValue);
+            } else {
+                node = core.createNode({parent:parent, base:META['StringElement']});
+                core.setAttribute(node,'name', name);
+                core.setAttribute(node,'value', jsonValue);
+                jsonPathToNodeDictionary[jsonPath] = node;
+            }
+        } else if (typeof jsonValue === 'number') {
+            if (node) {
+                if (!core.isInstanceOf(node, META['NumberElement'])) {
+                    core.setBase(node, META['NumberElement']);
+                }
+                core.setAttribute(node, 'value', jsonValue);
+            } else {
+                node = core.createNode({parent:parent, base:META['NumberElement']});
+                core.setAttribute(node, 'name', name);
+                core.setAttribute(node, 'value', jsonValue);
+                jsonPathToNodeDictionary[jsonPath] = node;
+            }
+        } else if (typeof jsonValue === 'boolean') {
+            if (node) {
+                if (!core.isInstanceOf(node, META['BooleanElement'])) {
+                    core.setBase(node, META['BooleanElement']);
+                }
+                core.setAttribute(node, 'value', jsonValue);
+            } else {
+                node = core.createNode({parent:parent, base:META['BooleanElement']});
+                core.setAttribute(node, 'name', name);
+                core.setAttribute(node, 'value', jsonValue);
+                jsonPathToNodeDictionary[jsonPath] = node;
+            }
+        } else if (jsonValue === null) {
+            if (node) {
+                if (!core.isInstanceOf(node, META['NullElement'])) {
+                    core.setBase(node, META['NullElement']);
+                }
+            } else {
+                node = core.createNode({parent:parent, base:META['NullElement']});
+                core.setAttribute(node,'name', name);
+                jsonPathToNodeDictionary[jsonPath] = node;
+            }
+        } else if (Array.isArray(jsonValue)) {
+            if (node) {
+                if(!core.isInstanceOf(node, META['ArrayElement'])) {
+                    if(core.isInstanceOf(node, META['ObjectElement'])) {
+                        const relids = core.getChildrenRelids(node);
+                        relids.forEach(childRelid => {
+                            const child = core.getChild(node, childRelid);
+                            const path = jsonPath + '/' + core.getAttribute(child, 'name');
+                            core.deleteNode(child);
+                            delete jsonPathToNodeDictionary[path];
+                            _clearSubElementsFromDictionary(jsonPathToNodeDictionary, path);
+                        });
+                    }
+                    core.setBase(node, META['ArrayElement']);
+                } 
+            } else {
+                node = core.createNode({parent:parent, base:META['ArrayElement']});
+                core.setAttribute(node, 'name', name);
+            }
+            jsonValue.forEach((value, index) => {
+                JSONToModel(jsonPathToNodeDictionary, value, jsonPath + '/' + index, index, node, core, META, logger);
+            });
+        } else if(typeof jsonValue === 'object') {
+            if (node) {
+                if(!core.isInstanceOf(node, META['ObjectElement'])) {
+                    if(core.isInstanceOf(node, META['ArrayElement'])) {
+                        const relids = core.getChildrenRelids(node);
+                        relids.forEach(childRelid => {
+                            const child = core.getChild(node, childRelid);
+                            const path = jsonPath + '/' + core.getAttribute(child, 'name');
+                            core.deleteNode(child);
+                            delete jsonPathToNodeDictionary[path];
+                            _clearSubElementsFromDictionary(jsonPathToNodeDictionary, path);
+                        });
+                    }
+                    core.setBase(node, META['ObjectElement']);
+                } 
+            } else {
+                node = core.createNode({parent:parent, base:META['ObjectElement']});
+                core.setAttribute(node, 'name', name);
+            }
+            Object.keys(jsonValue).forEach(key => {
+                JSONToModel(jsonPathToNodeDictionary, jsonValue[key], jsonPath + '/' + key, key, node, core, META, logger);
+            });
+        } else {
+            throw new Error('Unkown json element cannot be processed!');
+        }
+    }
+
+    const buidJSONDictionary = function(mainNode, core, META, Q, logger) {
+        const deferred = Q.defer();
+        const pathToNode = {};
+        const JSONPathToNode = {'': mainNode};
+        const processElement = function(node, pathSoFar) {
+            core.getChildrenPaths(node).forEach(childPath => {
+                const child = pathToNode[childPath];
+                const newPath = pathSoFar + '/' + core.getAttribute(child, 'name');
+                JSONPathToNode[newPath] = child;
+                if (core.isInstanceOf(child, META['ObjectElement']) || core.isInstanceOf(child, META['ArrayElement'])) {
+                    processElement(child, newPath);
+                }
+            });
+        };
+
+        core.loadSubTree(mainNode)
+        .then(nodes => {
+            nodes.forEach(node => {
+                pathToNode[core.getPath(node)] = node;
+            });
+
+            processElement(mainNode, '');
+            deferred.resolve(JSONPathToNode);
+        })
+        .catch(deferred.reject);
+
+        return deferred.promise;
+    }
     return {
         appendJSON: appendJSON,
-        JSONHierarchyToString: JSONHierarchyToString
+        JSONHierarchyToString: JSONHierarchyToString,
+        JSONToModel: JSONToModel,
+        buidJSONDictionary: buidJSONDictionary
     }
 });

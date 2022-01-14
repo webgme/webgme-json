@@ -6,11 +6,15 @@
 define([
     'js/Constants',
     'js/Utils/GMEConcepts',
-    'js/NodePropertyNames'
+    'js/NodePropertyNames',
+    'blob/BlobClient',
+    'q'
 ], function (
     CONSTANTS,
     GMEConcepts,
-    nodePropertyNames
+    nodePropertyNames,
+    BlobClient,
+    Q
 ) {
 
     'use strict';
@@ -26,6 +30,8 @@ define([
 
         this._currentNodeId = null;
         this._currentNodeParentId = undefined;
+
+        this._bc = new BlobClient({logger: this._logger.fork('BlobClient')});
 
         this._initWidgetEventHandlers();
 
@@ -44,8 +50,7 @@ define([
     // defines the parts of the project that the visualizer is interested in
     // (this allows the browser to then only load those relevant parts).
     TextualJSONEditorControl.prototype.selectedObjectChanged = function (nodeId) {
-        var desc = this._getObjectDescriptor(nodeId),
-            self = this;
+        var self = this;
 
         self._logger.debug('activeObject nodeId \'' + nodeId + '\'');
 
@@ -60,17 +65,11 @@ define([
         if (typeof self._currentNodeId === 'string') {
             // Put new node's info into territory rules
             self._selfPatterns = {};
-            self._selfPatterns[nodeId] = {children: 0};  // Territory "rule"
+            self._selfPatterns[nodeId] = {children: -1};  // Territory "rule"
 
-            self._widget.setTitle(desc.name.toUpperCase());
+            // self._widget.setTitle(desc.name.toUpperCase());
 
-            if (typeof desc.parentId === 'string') {
-                self.$btnModelHierarchyUp.show();
-            } else {
-                self.$btnModelHierarchyUp.hide();
-            }
-
-            self._currentNodeParentId = desc.parentId;
+            self._currentNodeParentId = self._client.getNode(nodeId).getParentId();
 
             self._territoryId = self._client.addUI(self, function (events) {
                 self._eventCallback(events);
@@ -78,27 +77,52 @@ define([
 
             // Update the territory
             self._client.updateTerritory(self._territoryId, self._selfPatterns);
-
-            self._selfPatterns[nodeId] = {children: 1};
-            self._client.updateTerritory(self._territoryId, self._selfPatterns);
         }
     };
 
-    // This next function retrieves the relevant node information for the widget
-    TextualJSONEditorControl.prototype._getObjectDescriptor = function (nodeId) {
-        var node = this._client.getNode(nodeId),
-            objDescriptor;
-        if (node) {
-            objDescriptor = {
-                id: node.getId(),
-                name: node.getAttribute(nodePropertyNames.Attributes.name),
-                childrenIds: node.getChildrenIds(),
-                parentId: node.getParentId(),
-                isConnection: GMEConcepts.isConnection(nodeId)
-            };
-        }
+    TextualJSONEditorControl.prototype.buildJSON = function() {
+        const deferred = Q.defer();
+        console.log('building');
+        const context = this._client.getCurrentPluginContext('ModelToJSON',this._currentNodeId, []);
+        context.pluginConfig = {};
+        this._client.runBrowserPlugin('ModelToJSON', context, (err, result) => {
+            if (err) {
+                deferred.reject(err);
+            } else {
+                deferred.resolve(result.messages[0].message);
+            }
+        });
+        return deferred.promise;
+    };
 
-        return objDescriptor;
+    TextualJSONEditorControl.prototype.saveJSON = function(jsonText) {
+        const deferred = Q.defer();
+        console.log('saving');
+        const context = this._client.getCurrentPluginContext('JSONToModel',this._currentNodeId, []);
+        context.pluginConfig = {jsonText: jsonText};
+        this._client.runBrowserPlugin('JSONToModel', context, (err, result) => {
+            if (err) {
+                deferred.reject(err);
+            } else {
+                deferred.resolve(result.messages[0].message);
+            }
+        });
+        return deferred.promise;   
+    };
+
+    TextualJSONEditorControl.prototype.exportJSON = function(jsonText) {
+        const deferred = Q.defer();
+        console.log('exporting');
+        const context = this._client.getCurrentPluginContext('ExportJSON',this._currentNodeId, []);
+        context.pluginConfig = {jsonText: jsonText, name: this._client.getNode(this._currentNodeId).getAttribute('name')};
+        this._client.runBrowserPlugin('ExportJSON', context, (err, result) => {
+            if (err) {
+                deferred.reject(err);
+            } else {
+                window.open(this._bc.getDownloadURL(result.artifacts[0]),'_blank');
+            }
+        });
+        return deferred.promise;   
     };
 
     /* * * * * * * * Node Event Handling * * * * * * * */
@@ -108,39 +132,15 @@ define([
 
         this._logger.debug('_eventCallback \'' + i + '\' items');
 
-        while (i--) {
-            event = events[i];
-            switch (event.etype) {
-
-            case CONSTANTS.TERRITORY_EVENT_LOAD:
-                this._onLoad(event.eid);
-                break;
-            case CONSTANTS.TERRITORY_EVENT_UPDATE:
-                this._onUpdate(event.eid);
-                break;
-            case CONSTANTS.TERRITORY_EVENT_UNLOAD:
-                this._onUnload(event.eid);
-                break;
-            default:
-                break;
-            }
+        if (events[0].etype === CONSTANTS.TERRITORY_EVENT_COMPLETE) {
+            let jsonValueString = this.buildJSON()
+            .then(jsonValue => {
+                this._widget.setJSON(jsonValue);
+            })
+            .catch(err => {
+                console.err(err);
+            })
         }
-
-        this._logger.debug('_eventCallback \'' + events.length + '\' items - DONE');
-    };
-
-    TextualJSONEditorControl.prototype._onLoad = function (gmeId) {
-        var description = this._getObjectDescriptor(gmeId);
-        this._widget.addNode(description);
-    };
-
-    TextualJSONEditorControl.prototype._onUpdate = function (gmeId) {
-        var description = this._getObjectDescriptor(gmeId);
-        this._widget.updateNode(description);
-    };
-
-    TextualJSONEditorControl.prototype._onUnload = function (gmeId) {
-        this._widget.removeNode(gmeId);
     };
 
     TextualJSONEditorControl.prototype._stateActiveObjectChanged = function (model, activeObjectId) {
@@ -178,6 +178,14 @@ define([
     TextualJSONEditorControl.prototype.onDeactivate = function () {
         this._detachClientEventListeners();
         this._hideToolbarItems();
+    };
+
+    TextualJSONEditorControl.prototype.onJsonValidityChanged = function (isValid) {
+        if (isValid) {
+            this.$btnSave.enabled(true);
+        } else {
+            this.$btnSave.enabled(false);
+        }
     };
 
     /* * * * * * * * * * Updating the toolbar * * * * * * * * * */
@@ -218,27 +226,28 @@ define([
 
         this._toolbarItems.push(toolBar.addSeparator());
 
-        /************** Go to hierarchical parent button ****************/
-        this.$btnModelHierarchyUp = toolBar.addButton({
-            title: 'Go to parent',
-            icon: 'glyphicon glyphicon-circle-arrow-up',
+        this.$btnSave = toolBar.addButton({
+            title: 'Save',
+            icon: 'glyphicon glyphicon-floppy-save',
             clickFn: function (/*data*/) {
-                WebGMEGlobal.State.registerActiveObject(self._currentNodeParentId);
+               let jsonValue = self._widget.getJSON();
+               self.saveJSON(jsonValue);
             }
         });
-        this._toolbarItems.push(this.$btnModelHierarchyUp);
-        this.$btnModelHierarchyUp.hide();
+        this._toolbarItems.push(this.$btnSave);
+        this.$btnSave.show();
+        this.$btnSave.enabled(false);
 
-        /************** Checkbox example *******************/
-
-        this.$cbShowConnection = toolBar.addCheckBox({
-            title: 'toggle checkbox',
-            icon: 'gme icon-gme_diagonal-arrow',
-            checkChangedFn: function (data, checked) {
-                self._logger.debug('Checkbox has been clicked!');
+        this.$btnExport = toolBar.addButton({
+            title: 'Export',
+            icon: 'glyphicon glyphicon-export',
+            clickFn: function (/*data*/) {
+               let jsonValue = self._widget.getJSON();
+               self.exportJSON(jsonValue);
             }
         });
-        this._toolbarItems.push(this.$cbShowConnection);
+        this._toolbarItems.push(this.$btnExport);
+        this.$btnExport.show();
 
         this._toolbarInitialized = true;
     };

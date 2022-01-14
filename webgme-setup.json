@@ -12,6 +12,14 @@
       "CreateConfig": {
         "src": "src/plugins/CreateConfig",
         "test": "test/plugins/CreateConfig"
+      },
+      "ModelToJSON": {
+        "src": "src/plugins/ModelToJSON",
+        "test": "test/plugins/ModelToJSON"
+      },
+      "JSONToModel": {
+        "src": "src/plugins/JSONToModel",
+        "test": "test/plugins/JSONToModel"
       }
     },
     "seeds": {
@@ -27,11 +35,19 @@
         "secondary": false,
         "widget": "src/visualizers/widgets/TextualJSONEditor"
       }
-    }
+    },
+    "addons": {},
+    "decorators": {},
+    "layouts": {},
+    "routers": {}
   },
   "dependencies": {
     "plugins": {},
     "seeds": {},
-    "visualizers": {}
+    "visualizers": {},
+    "addons": {},
+    "decorators": {},
+    "layouts": {},
+    "routers": {}
   }
 }

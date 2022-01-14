@@ -55,6 +55,8 @@ define([
             widget: this.widget
         });
 
+
+
         this.onActivate();
     };
 
@@ -82,7 +84,7 @@ define([
     };
 
     TextualJSONEditorPanel.prototype.onActivate = function () {
-        this.widget.onActivate();
+        this.widget.onActivate(this.control);
         this.control.onActivate();
         WebGMEGlobal.KeyboardManager.setListener(this.widget);
         WebGMEGlobal.Toolbar.refresh();
