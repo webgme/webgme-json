@@ -80,11 +80,29 @@ define([
         }
     };
 
+    TextualJSONEditorControl.prototype._getPluginNamespace = function() {
+        const node = this._client.getNode(this._currentNodeId);
+        if(node) {
+            const name = node.getAttribute('name');
+            const fullName = node.getFullyQualifiedName();
+
+            if (name.length === fullName.length) {
+                return '';
+            } else {
+                return fullName.substring(0, fullName.length - (name.length+1) );
+            }
+        }
+        return '';
+    };
+
     TextualJSONEditorControl.prototype.buildJSON = function() {
         const deferred = Q.defer();
         console.log('building');
+
         const context = this._client.getCurrentPluginContext('ModelToJSON',this._currentNodeId, []);
         context.pluginConfig = {};
+        context.managerConfig.namespace = this._getPluginNamespace();
+
         this._client.runBrowserPlugin('ModelToJSON', context, (err, result) => {
             if (err) {
                 deferred.reject(err);
@@ -100,6 +118,8 @@ define([
         console.log('saving');
         const context = this._client.getCurrentPluginContext('JSONToModel',this._currentNodeId, []);
         context.pluginConfig = {jsonText: jsonText};
+        context.managerConfig.namespace = this._getPluginNamespace();
+
         this._client.runBrowserPlugin('JSONToModel', context, (err, result) => {
             if (err) {
                 deferred.reject(err);
@@ -115,6 +135,8 @@ define([
         console.log('exporting');
         const context = this._client.getCurrentPluginContext('ExportJSON',this._currentNodeId, []);
         context.pluginConfig = {jsonText: jsonText, name: this._client.getNode(this._currentNodeId).getAttribute('name')};
+        context.managerConfig.namespace = this._getPluginNamespace();
+        
         this._client.runBrowserPlugin('ExportJSON', context, (err, result) => {
             if (err) {
                 deferred.reject(err);
