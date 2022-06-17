@@ -1,5 +1,5 @@
 # webgme-json
-## Puprose
+## Purpose
 This project intends to provide a simple JSON domain where users can create/import/export JSON content. It allows for typing and instantiating JSON to help with creating small changes in objects.
 The short-term future is going to bring specialized visualizer that leverages the type-instance relationship and allows for more control. Additionally, potential text based editing will be available... (however using the import/export functions it can already be done, but might be too cumbersome).
 
